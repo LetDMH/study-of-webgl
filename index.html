@@ -2,7 +2,7 @@
  * @Author: minghui.ding
  * @Date: 2020-12-06 00:13:08
  * @LastEditors: minghui.ding
- * @LastEditTime: 2020-12-06 20:22:50
+ * @LastEditTime: 2020-12-09 18:57:49
  * @Description: 
 -->
 <!DOCTYPE html>
@@ -16,14 +16,15 @@
     <canvas id="demo" width="400" height="400"></canvas>
     <script type="notjs" id="vertex_shader">
       attribute vec4 a_Position;
+      attribute float a_PointSize;
       void main () {
           gl_Position = a_Position;
-          gl_PointSize = 10.0;
+          gl_PointSize = a_PointSize;
       }
     </script>
     <script type="notjs" id="fragment_shader">
       void main () {
-        gl_FragColor = vec4(1,0,0,1);
+        gl_FragColor = vec4(1, 0, 0.5, 1);
       }
     </script>
     <script>
@@ -43,6 +44,7 @@
           return shader
         }
         console.log(gl.getShaderInfoLog(shader))
+        gl.deleteShader(shader)
       }
       //创建程序
       function createProgram(gl, VShader, FShader) {
@@ -55,19 +57,28 @@
           return program
         }
         console.log(gl.getProgramInfoLog(program))
+        gl.deleteProgram(program)
       }
       //初始化webgl系统
-      function initSys(gl, VShaderEle, FShaderEle, Position) {
+      function initSys(
+        gl,
+        VShaderEle,
+        FShaderEle,
+        Position = [0, 0, 0],
+        PointSize = 5.0
+      ) {
         let VShader = createShader(gl, gl.VERTEX_SHADER, VShaderEle)
         let FShader = createShader(gl, gl.FRAGMENT_SHADER, FShaderEle)
         let program = createProgram(gl, VShader, FShader)
         gl.useProgram(program)
         let a_Position = gl.getAttribLocation(program, 'a_Position')
+        let a_PointSize = gl.getAttribLocation(program, 'a_PointSize')
         gl.vertexAttrib3f(a_Position, ...Position)
+        gl.vertexAttrib1f(a_PointSize, PointSize)
       }
       let VShaderEle = document.getElementById('vertex_shader').innerText
       let FShaderEle = document.getElementById('fragment_shader').innerText
-      initSys(gl, VShaderEle, FShaderEle, [0.5, 0.5, 0])
+      initSys(gl, VShaderEle, FShaderEle, [0.5, 0.5, 0], 20)
       gl.clearColor(0, 0.5, 0.25, 1)
       gl.clear(gl.COLOR_BUFFER_BIT)
       gl.drawArrays(gl.POINTS, 0, 1)
